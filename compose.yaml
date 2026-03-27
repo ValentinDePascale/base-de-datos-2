@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: tp_1_2 # también será el nombre del servidor en pgAdmin cuando se configure la conexión
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: practicos_db2
+    ports:
+      - "5433:5432" # <-- Cambiado para evitar conflicto con instalacion local de postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # 1. Pasamos el archivo binario a una carpeta temporal dentro del contenedor
+      - ./dump.backup:/tmp/dump.backup
+      # 2. Pasamos el script que se ejecutará automáticamente y hará el pg_restore
+      - ./restore.sh:/docker-entrypoint-initdb.d/restore.sh
+      
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_tp_1_2
+    restart: always
+    user: root # para evitar problemas de permisos al crear archivos desde pgAdmin en la carpeta local
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@correo.com
+      PGADMIN_DEFAULT_PASSWORD: admin_password
+      PGADMIN_CONFIG_SERVER_MODE: False # server mode (multi-user) or desktop mode (single-user). Permite el acceso sin autenticación
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: False # Si se establece en True, se solicitará una contraseña maestra al iniciar pgAdmin. Esto agrega una capa adicional de seguridad, ya que los usuarios deberán ingresar esta contraseña para acceder a la interfaz de pgAdmin y gestionar las conexiones a las bases de datos.
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    volumes:
+      # Defino una carpeta local donde almacenar los archivos sql que trabajemos desde pgAdmin
+      - ./solucion_practicos:/root/GUARDAR_ARCHIVOS_ACA
+
+volumes:
+  postgres_data:
