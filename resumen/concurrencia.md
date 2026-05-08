@@ -12,7 +12,7 @@ Es el orden cronológico en el que se ejecutan las instrucciones de las transacc
 
 *   **En Serie:** Las transacciones se ejecutan una tras otra por completo. Son seguras pero ineficientes en sistemas con muchos usuarios.
 *   **Intercalada:** Las instrucciones de diferentes transacciones se mezclan para optimizar el uso de CPU.
-*   **Equivalencia por Conflictos:** Una planificación es válida si el orden de sus instrucciones en conflicto es equivalente a alguna ejecución en serie.
+*   **Equivalencia por Conflictos:** Una planificación es válida si el orden de sus instrucciones en conflicto es equivalente a alguna ejecución en serie, si esto se cumple podemos decir q hay una Equivalencia entre Planificaciones Aunque el orden de las Transacciones cambie, el resultado siempre sera el mismo.
 
 ### Problemas comunes de la concurrencia
 1.  **Lectura Sucia (Dirty Read):** $T_1$ modifica un dato, $T_2$ lo lee y luego $T_1$ hace `ROLLBACK`. $T_2$ trabajó con un dato que "nunca existió".
@@ -33,11 +33,12 @@ Herramienta para detectar si una planificación es segura:
 
 ---
 
+## LECTURA NO REPETIBLE
 ## 3. Métodos de Bloqueo (Enfoque Pesimista)
 
 ### Tipos de bloqueos:
-*   **Modo Compartido (S - Shared):** Para lectura. Varias transacciones pueden leer el mismo dato a la vez.
-*   **Modo Exclusivo (X - Exclusive):** Para escritura. Si una transacción lo tiene, nadie más puede leer ni escribir ese dato.
+*   **Modo Compartido (S - Shared):** Para lectura. Permite q otras transacciones hagan SELECT, pero no INSERTS, UPDATES O DELETES. `FOR SHARE`
+*   **Modo Exclusivo (X - Exclusive):** Para escritura. Si una transacción lo tiene, nadie más puede leer ni escribir ese dato. `FOR UPDATE`
 
 ### Bloqueo en Dos Fases (B2F / 2PL)
 1.  **Fase de Expansión:** Se solicitan bloqueos. No se permite liberar ninguno.
@@ -47,18 +48,24 @@ Herramienta para detectar si una planificación es segura:
 > **B2F Riguroso:** Libera todos los bloqueos solo al final de la transacción (`COMMIT/ROLLBACK`). Es el más usado para evitar que otros lean datos que podrían ser revertidos.
 
 ### Gestión de Fallos
-*   **Deadlock (Interbloqueo):** $T_1$ espera a $T_2$ y viceversa. El SGBD aborta una "víctima" basada en antigüedad o costo.
+*   **Deadlock (Interbloqueo):** $T_1$ espera a $T_2$ y viceversa. El SGBD aborta una "víctima" basada en antigüedad o costo. FOR SHARE PRIMERO Y FOR UPDATE DESPUES
 *   **Inanición (Starvation):** Una transacción es elegida siempre como víctima. Se soluciona aumentando su prioridad con cada reintento.
 
 ---
 
-## 4. MVCC (Control de Concurrencia Multiversión)
+## 4. MVCC (Control de Concurrencia Multiversión) OPTIMISTA
 
 Es el enfoque de **PostgreSQL** para evitar que los lectores bloqueen a los escritores.
 
 *   **Snapshot Isolation:** Al hacer un `SELECT`, el sistema te da una "foto" de los datos tal cual estaban al inicio de la transacción.
 *   **Múltiples Versiones:** En lugar de sobrescribir, el sistema crea una nueva versión del dato. Los lectores ven la versión vieja y los escritores operan sobre la nueva.
 *   **Regla de oro:** Los lectores nunca bloquean a los escritores y los escritores nunca bloquean a los lectores.
+
+Basicamente, asumis q no hay conflictos y ademas, garantizas lecturas repetibles sin bloquear
+```sql
+BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+```
 
 ### Niveles de Aislamiento
 | Nivel | Descripción |
@@ -69,6 +76,12 @@ Es el enfoque de **PostgreSQL** para evitar que los lectores bloqueen a los escr
 | **Serializable** | Máximo aislamiento. Garantiza consistencia total mediante abortos si hay sospecha de conflicto. |
 
 ---
+
+
+
+### CHECK
+
+Reglas q abortan automaticamente las transacciones si se incumplen normas. Hasta no hacer ROLLBACK, no podemos hacer nada en la transaccion
 
 ## 5. Ejemplos SQL (PostgreSQL)
 
