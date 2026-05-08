@@ -1,4 +1,4 @@
-A:
+    A:
 BEGIN;
 
 SELECT *

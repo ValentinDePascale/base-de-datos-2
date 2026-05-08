@@ -139,3 +139,20 @@ WHERE fecha >= '2026-01-01';
 ANALYZE clientes;
 ANALYZE pedidos;
 ```
+
+
+1. La Regla de Oro: I - R - O
+Para decidir el orden de las columnas dentro de un INDEX(col1, col2, col3), sigue siempre este orden de prioridad de izquierda a derecha:
+
+I - Igualdad (=): Coloca primero las columnas que aparecen en el WHERE con un signo de igual (ej. id_sucursal = 15).
+
+R - Rango (>, <, BETWEEN, LIKE): Luego las columnas que filtran por rangos.
+
+O - Orden (ORDER BY): Por último, las columnas que usas para ordenar los resultados.
+
+¿Por qué este orden? Porque el índice es como un diccionario. Si buscas "Pérez" (Igualdad) y luego nombres que empiecen con "A-M" (Rango), es fácil. Si lo haces al revés, el índice pierde efectividad.
+
+2. La Técnica de la "Selectividad"
+No todas las columnas merecen un índice. La técnica consiste en elegir columnas que filtren mucho.
+
+Alta Selectividad (Buen índice): DNI, email, id_cliente. Tienen muchos valores distintos.

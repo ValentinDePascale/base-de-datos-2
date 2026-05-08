@@ -64,6 +64,11 @@ GRANT DELETE ON Movimientos TO admin_banco;
 GRANT INSERT, SELECT ON Cuentas TO operativo WITH GRANT OPTION;
 ```
 
+Borrar todos los permisos en la tabla pedidos del rol_vendedor
+
+```sql
+REVOKE ALL ON pedidos FROM rol_vendedor;
+```
 
 ## Modelos de Control de Acceso
 
@@ -94,7 +99,15 @@ Transforma datos legibles en texto ilegible.
 *   Simétrico: Usa la misma clave para cifrar y descifrar(rápido, usado con pgp_sym_encrypt en Postgres).
 *   Asimetrico :Usa una clave pública para cifrar y una   privada para descifrar (más lento pero más seguro).
 *   Funciones Hash: Son de un solo sentido (no se pueden descifrar). Se usan para verificar contraseñas.
-*   
+`gen_salt('bf')`, genera claves aleatorias y las mezcla con el dato q estamos queriendo cifrar, esta se ve mas o menos asi: $2a$06$R.D/E218h91j...<resto del hash>
+ 
+La SGBD, para darse cuenta si el dato q se incripto es el correcto, la funcion crypy, comprueba con q salt alteatorio se mezclo la primera vez, entonces si el dato de crypt mezclado con el primer salt es identico al dato ya encriptado, significa que es el mismo y dara true
+```sql
+SELECT (pin_entrega_hash = crypt('4092', pin_entrega_hash)) AS pin_correcto
+FROM datos_importantes
+WHERE id_cliente = 1
+```
+
 ### SQL Injection
 Cuando un atacante aprovecha un formulario web para inyectar codigo malicioso (Ej. DROP TABLE usuarios).
 
