@@ -17,7 +17,7 @@ El procesamiento sigue un flujo estricto para extraer datos:
 
 ## Fase 2: Optimización
 
-*   **Optimizacion Logica (Heurística):** Reglas predefinidas. Aplicar filtros lo antes posible para descartar filas, proyectar las columnas necesarias y reordenar JOINS, combinando las tablas que resulten en conjuntos de datos mas pequeños.
+*   **Optimizacion Logica (Heurística):** Reglas predefinidas. Aplicar filtros lo antes posible para descartar filas, proyectar las columnas necesarias y reordenar JOINS, combinando las tablas que resulten en conjuntos de datos mas pequeños. 
   
 ### **Optimizacion Fisica (Basada en costos CBO)**:## 
 El optimizador elige el que menos cuesta en terminos de hardware. En base a:
@@ -26,6 +26,7 @@ Selectividad y Cardinalidad: que porcentaje total de la tabla se devolvera y cua
 
 *   Alta Selectividad: 0.1% de la tabla, directo al dato
 *   Baja Selectividad: 60% de la tabla.
+  
 *   Alta Cardinalidad: Valores unicos. DNI, Email, Numero de pedido (no se repiten)
 *   Baja Cardinalidad: Valores repetidos. Genero, estado, provincia
 
@@ -37,6 +38,7 @@ Si posee baja selectividad, osea se necesita leer un gran pocentaje de la tabla,
 
   W representa el peso o importancia q le da el motor a cada recurso
 
+Mediante Index y Vistas
 
 ## El Plan de Ejecución (EXPLAIN)
 
